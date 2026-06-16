@@ -7,7 +7,7 @@ This repository is a minimal full-stack example that combines Next.js App Router
 - Email/password authentication with Supabase Auth (sign in + sign out).
 - Session-aware route protection in `proxy.ts`.
 - Typed Supabase clients for server and browser usage.
-- Row-level-security-aware data reads from `Post` (different visibility for anon vs authenticated users).
+- Row-level-security-aware data reads from `Post` (different visibility for anon vs authenticated users and various roles).
 - Supabase Edge Function invocation from the app (`edge-runner`) with user auth context.
 - Prisma-managed schema and migrations for local database evolution.
 
