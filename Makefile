@@ -1,6 +1,7 @@
 start-dev:
-	@concurrently -n "supabase,nextjs" -c "green,blue" \
+	@concurrently -n "supabase,sup-functions,nextjs" -c "white,green,blue" \
 		"bunx supabase start" \
+		"bunx supabase functions serve" \
 		"bunx next dev" 
 
 stop-dev:
@@ -24,3 +25,7 @@ prisma-reset:
 
 seed:
 	bun run seed
+
+supabase-types:
+	node -e "require('fs').mkdirSync('generated/supabase',{recursive:true})"
+	bunx supabase gen types typescript --local --schema public > generated/supabase/database.types.ts

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/server";
 type Post = {
   id: string;
   title: string;
-  content: string | null;
+  content?: string;
   authorId: string;
   createdAt: string;
 };
@@ -15,26 +15,41 @@ export default async function Home() {
   const role = user ? "authenticated" : "anon";
   const canReadContent = role !== "anon";
 
-  const selectFields = canReadContent
-    ? "id,title,content,authorId,createdAt"
-    : "id,title,authorId,createdAt";
+  console.log("User:", user?.email, "Role:", role);
 
-  const queryResult = await supabase
-    .from("Post")
-    .select(selectFields)
-    .order("createdAt", { ascending: false });
+  // Invoke edge function to demonstrate auth context is passed correctly
+  const functionResponse = await supabase.functions.invoke("edge-runner", {
+    body: { name: "Supabase Functions" },
+  });
 
-  const { data, error } = queryResult;
+  console.log("Function response:", functionResponse.data);
+
+  let queryResponse: { data: Post[] | null; error: Error | null };
+
+  if (canReadContent) {
+    queryResponse = await supabase
+      .from("Post")
+      .select("id,title,content,authorId,createdAt")
+      .order("createdAt", { ascending: false });
+  } else {
+    queryResponse = await supabase
+      .from("Post")
+      .select("id,title,authorId,createdAt")
+      .order("createdAt", { ascending: false });
+  }
+
+  const { data, error } = queryResponse;
 
   const errorMessage = error?.message ?? null;
-  const rows = (data ?? []) as unknown as Array<Record<string, string | null>>;
+  const rows = data ?? [];
+
   const posts = rows.map((post) => ({
-    id: post.id ?? "",
-    title: post.title ?? "",
-    authorId: post.authorId ?? "",
-    createdAt: post.createdAt ?? "",
-    content: canReadContent ? (post.content ?? null) : null,
-  })) as Post[];
+    id: post.id,
+    title: post.title,
+    authorId: post.authorId,
+    createdAt: post.createdAt,
+    content: canReadContent ? post.content : null,
+  }));
 
   return (
     <div className="flex flex-1 justify-center bg-zinc-50 px-4 py-10 dark:bg-black">
@@ -60,9 +75,9 @@ export default async function Home() {
           </p>
         ) : null}
 
-        {posts && posts.length > 0 ? (
+        {posts.length > 0 ? (
           <ul className="mt-8 space-y-3">
-            {(posts as Post[]).map((post) => (
+            {posts.map((post) => (
               <li
                 key={post.id}
                 className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "supabase:types": "node -e \"require('fs').mkdirSync('generated/supabase',{recursive:true})\" && supabase gen types typescript --local --schema public > generated/supabase/database.types.ts",
     "prisma:generate": "prisma generate --config prisma/prisma.config.ts",
     "prisma:migrate": "prisma migrate dev --config prisma/prisma.config.ts --name",
     "prisma:studio": "prisma studio --config prisma/prisma.config.ts",
